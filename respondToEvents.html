@@ -11,20 +11,28 @@
         
         function initViz() {
             var containerDiv = document.getElementById("vizContainer"),
-                url = "http://public.tableau.com/views/RegionalSampleWorkbook/College",
+                url = "https://public.tableau.com/views/ResponseRatePrototype_15718629692310/ResponseRateDashboard?:embed=y&:display_count=yes&publish=yes&:origin=viz_share_link",
                 options = {
                     "Academic Year": "",
                     hideTabs: true,
                     onFirstInteractive: function () {
-                        listenToMarksSelection();
+                        addVizEventListeners();
                     }
                 };
             
             viz = new tableau.Viz(containerDiv, url, options);
         }
 
-        function listenToMarksSelection() {
-            viz.addEventListener(tableau.TableauEventName.MARKS_SELECTION, onMarksSelection);
+        function addVizEventListeners() {
+            viz.addEventListener(tableau.TableauEventName.FILTER_CHANGE, onFilterChange);
+        }
+
+        function onFilterChange(filterEvent) {
+            return marksEvent.getFilterAsync().then(reportFilterChange);
+        }
+
+        function reportFilterChange(updatedFilter) {
+            console.log("Filter Changed");
         }
 
         function onMarksSelection(marksEvent) {
