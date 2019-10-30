@@ -28,7 +28,7 @@
         }
 
         function onFilterChange(filterEvent) {
-            return marksEvent.getFilterAsync().then(reportFilterChange);
+            return filterEvent.getFilterAsync().then(reportFilterChange);
         }
 
         function reportFilterChange(updatedFilter) {
