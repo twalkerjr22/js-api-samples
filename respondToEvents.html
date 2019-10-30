@@ -27,8 +27,8 @@
             viz.addEventListener(tableau.TableauEventName.FILTER_CHANGE, onFilterChange);
         }
 
-        function onFilterChange(filterEvent) {
-            return filterEvent.getFilterAsync().then(reportFilterChange);
+        function onFilterChange(filterChangeEvent) {
+            return filterChangeEvent.getFilterAsync().then(reportFilterChange);
         }
 
         function reportFilterChange(updatedFilter) {
