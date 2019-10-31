@@ -8,13 +8,14 @@
     
     <script type="text/javascript">
         var viz;
-        
+        var workbook;
         function initViz() {
             var containerDiv = document.getElementById("vizContainer"),
                 url = "https://public.tableau.com/views/ResponseRatePrototype_15718629692310/ResponseRateDashboard?:display_count=y&:origin=viz_share_link",
                 options = {
                     onFirstInteractive: function () {
                         addVizEventListeners();
+                        workbook = viz.getWorkbook();
                     }
                 };
             
@@ -32,7 +33,7 @@
         }
         function onParamChange(paramChangeEvent) {
             console.log("Param event triggered...");
-            return paramChangeEvent.getParameterAsync().then(reportParamChange);
+           // return paramChangeEvent.getParameterAsync().then(reportParamChange);
         }
         function reportParamChange(updatedParam) {
             console.log("Param Changed...");
@@ -42,6 +43,21 @@
         }
         function onMarksSelection(marksEvent) {
             return marksEvent.getMarksAsync().then(reportSelectedMarks);
+        }
+        function changeStateParam(state) {
+           
+            if (state === "") {
+                workbook.changeParameterValueAsync("State Selection",'Continguous');
+            } else {
+                workbook.changeParameterValueAsync("State Selection", state);
+            }
+        }
+        function changeGeographyParam(geo) {
+            if (geo === "") {
+                workbook.changeParameterValueAsync("Select a Geography",'State');
+            } else {
+                workbook.changeParameterValueAsync("Select a Geography", geo);
+            }
         }
         function reportSelectedMarks(marks) {
             var html = ""; 
@@ -63,9 +79,40 @@
 </head>
 
 <body onload="initViz();">
+    <div class="filters">
+        <label for="changeState">State Selection</label>
+        <select name="State Selection" id="changeState" onchange="changeStateParam(value)">
+            <option value="Continguous">Continguous</option>
+            <option value="Alaska">Alaska</option>
+            <option value="Hawaii">Hawaii</option>
+            <option value="Puerto Rico">Puerto Rico</option>
+        </select>
+        <label for="changeGeography">Select a Geography</label>
+        <select name="Select a Geography" id="changeGeography" onchange="changeGeographyParam(value)">
+            <option value="State">State</option>
+            <option value="County">County</option>
+            <option value="Incorporated Place">Incorporated Place</option>
+            <option value="Congressional District">Congressional District</option>
+            <option value="Census Tract">Census Tract</option>
+            <option value="County Subdivision">County Subdivision</option>
+            <option value="American Indian/alaska Native Areas/hawaiian Home Lands">
+                American Indian/alaska Native Areas/hawaiian Home Lands
+            </option>
+        </select>
+    </div>
     <div id="vizContainer"></div>
     <br>
     <div id="markDetails">Information about selected marks displays here.</div>
 </body>
 
 </html>
+
+<style>
+    .filters {
+        display: flex;
+        flex-direction: column;
+        max-width: 50%;
+        margin: 0 auto;
+        padding:20px 0;
+    }
+</style>
