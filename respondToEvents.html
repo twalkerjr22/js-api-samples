@@ -14,7 +14,7 @@
         }
         function initViz() {
             var containerDiv = document.getElementById("vizContainer"),
-                url = "https://public.tableau.com/views/ResponseRatePrototype/ResponseRateDashboard?:display_count=y&:origin=viz_share_link";
+                url = "https://public.tableau.com/views/ResponseRatePrototype_15718629692310/ResponseRateDashboard";
                 options = {
                     onFirstInteractive: function () {
                         addVizEventListeners();
@@ -53,6 +53,7 @@
                 workbook.changeParameterValueAsync("State Selection",'Continguous');
             } else {
                 currParams.state = state;
+                updateUrl('state',state);
                 workbook.changeParameterValueAsync("State Selection", state);
             }
         }
@@ -61,8 +62,16 @@
                 workbook.changeParameterValueAsync("Select a Geography",'State');
             } else {
                 currParams.geography = geo;
+                updateUrl('geo',geo);
                 workbook.changeParameterValueAsync("Select a Geography", geo);
             }
+        }
+        // will need to use a polyfill for ie 11 and lower support. https://github.com/ungap/url-search-params
+        function updateUrl(paramName,value){
+            var urlParams = new URLSearchParams(window.location.search);
+            urlParams.set(paramName, value)
+            window.history.pushState("object or string", "Title","/?"+urlParams.toString());
+
         }
     </script>
 </head>
