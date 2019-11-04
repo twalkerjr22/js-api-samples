@@ -14,22 +14,47 @@
         }
         function initViz() {
             var containerDiv = document.getElementById( 'vizContainer' ),
-                url = "https://public.tableau.com/views/ResponseRatePrototype_15718629692310/ResponseRateDashboard";
+                url = "https://public.tableau.com/views/ResponseRatePrototype_15718629692310/ResponseRateDashboard" //"https://public.tableau.com/views/ResponseRatePrototype/ResponseRateDashboard?:display_count=y&:origin=viz_share_link";
                 options = {
                     onFirstInteractive: function () {
                         workbook = viz.getWorkbook();
+                        initEventListeners();
                     }
                 };
             
             viz = new tableau.Viz( containerDiv, url, options );
         }
 
+        function initEventListeners() {
+            viz.addEventListener(tableau.TableauEventName.FILTER_CHANGE, onFilterChange);
+            viz.addEventListener(tableau.TableauEventName.PARAMETER_VALUE_CHANGE, onParameterChange);
+
+
+        }
+
+        function onFilterChange(filterChangeEvent) {
+            return filterChangeEvent.getFilterAsync().then(reportFilterChange);
+        }
+
+        function reportFilterChange(updatedFilter) {
+            console.log("Filter Changed");
+        }
+
+        function onParameterChange(paramChangeEvent) {
+            return paramChangeEvent.getParameterAsync().then(reportParamChange);
+        }
+
+        function reportParamChange(updatedParam) {
+            console.log(updatedParam.getCurrentValue());
+            updateUrl(updatedParam.getName(),updatedParam.getCurrentValue().value);
+        }
+
+
         function changeParam( filterName,value ){
             if (value === "") {
                 
             } else {
                 currParams[filterName] = value;
-                updateUrl(filterName,value);
                 workbook.changeParameterValueAsync(filterName, value);
             }
         }
