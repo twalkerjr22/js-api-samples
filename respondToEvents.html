@@ -1,25 +1,42 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Respond to Events</title>
     
+
     <script type="text/javascript" src="https://public.tableau.com/javascripts/api/tableau-2.min.js"></script>
+
     
-    <script type="text/javascript">
+    <script type='text/javascript'>
         var viz;
-        
+        var workbook;
+        var currParams = {
+            state: '',
+            geography: ''
+        }
         function initViz() {
-            var containerDiv = document.getElementById("vizContainer"),
-                url = "https://public.tableau.com/views/ResponseRatePrototype_15718629692310/ResponseRateDashboard?:display_count=y&:origin=viz_share_link",
+
+            var containerDiv = document.getElementById( 'vizContainer' ),
+                url = "https://public.tableau.com/views/ResponseRatePrototype5/Federal";
                 options = {
                     onFirstInteractive: function () {
-                        addVizEventListeners();
-                    }
+                        workbook = viz.getWorkbook();
+                        initEventListeners();
+                    },
+                    
                 };
             
-            viz = new tableau.Viz(containerDiv, url, options);
+            viz = new tableau.Viz( containerDiv, url, options );              
+                           
         }
+
+        function initEventListeners() {
+            viz.addEventListener(tableau.TableauEventName.FILTER_CHANGE, onFilterChange);
+            viz.addEventListener(tableau.TableauEventName.PARAMETER_VALUE_CHANGE, onParameterChange);
+
+
+        }
+
 
         function addVizEventListeners() {
             viz.addEventListener(tableau.TableauEventName.FILTER_CHANGE, onFilterChange);
@@ -52,33 +69,90 @@
             return marksEvent.getMarksAsync().then(reportSelectedMarks);
         }
 
-        function reportSelectedMarks(marks) {
-            var html = ""; 
-            
-            for (var markIndex = 0; markIndex < marks.length; markIndex++) {
-                var pairs = marks[markIndex].getPairs();
-                html += "<b>Mark " + markIndex + ":</b><ul>";
+        function onParameterChange(paramChangeEvent) {
+            return paramChangeEvent.getParameterAsync().then(reportParamChange);
+        }
 
-                for (var pairIndex = 0; pairIndex < pairs.length; pairIndex++) {
-                    var pair = pairs[pairIndex];
-                    html += "<li><b>Field Name:</b> " + pair.fieldName;
-                    html += "<br/><b>Value:</b> " + pair.formattedValue + "</li>";
-                }
+        function reportParamChange(updatedParam) {
+            console.log(updatedParam.getCurrentValue());
+            updateUrl(updatedParam.getName(),updatedParam.getCurrentValue().value);
+        }
 
-                html += "</ul>";
+
+        function changeParam( filterName,value ){
+            if (value === "") {
+                
+            } else {
+                currParams[filterName] = value;
+                workbook.changeParameterValueAsync(filterName, value);
             }
+        }
 
-            var infoDiv = document.getElementById('markDetails');
-            infoDiv.innerHTML = html;
+        function changeFilter( filterName,value ){
+            if (value === "") {
+                
+            } else {
+                currParams[filterName] = value;
+                updateUrl(filterName,value);
+                workbook.changeFilterAsync(filterName, value);
+            }
+        }
+        // will need to use a polyfill for ie 11 and lower support. https://github.com/ungap/url-search-params
+        function updateUrl(paramName,value){
+            var urlParams = new URLSearchParams(window.location.search);
+            urlParams.set(paramName, value)
+            window.history.pushState('object or string', 'Title','/?'+urlParams.toString());
+
         }
     </script>
 </head>
 
-<body onload="initViz();">
-    <div id="vizContainer"></div>
-    <br>
-    <div id="markDetails">Information about selected marks displays here.</div>
+<body onload='initViz();''>
+    <div class='filters'>
+        <label for='changeState'>State Selection</label>
+        <select name='State Selection' id='changeState' onchange='changeParam(this.name,value)'>
+            <option value="Continguous">Continguous</option>
+            <option value="Alaska">Alaska</option>
+            <option value="Hawaii">Hawaii</option>
+            <option value="Puerto Rico">Puerto Rico</option>
+        </select>
+        <label for="changeGeography">Select a geography</label>
+        <select name="Select a Geography" id="changeGeography" onchange="changeParam(this.name,value)">
+            <option value="State">State</option>
+            <option value="County">County</option>
+            <option value="Incorporated Place">Incorporated Place</option>
+            <option value="Congressional District">Congressional District</option>
+            <option value="Census Tract">Census Tract</option>
+            <option value="County Subdivision">County Subdivision</option>
+            <option value="American Indian/alaska Native Areas/hawaiian Home Lands">
+                American Indian/alaska Native Areas/hawaiian Home Lands
+            </option>
+        </select>
+        <label for="changeGeography">Response Type</label>
+        <select name="Response Type" id="changeResponseType" onchange="changeParam(this.name,value)">
+            <option value="Total">Total</option>
+            <option value="Internet">Internet</option>
+        </select>
+        <label for="changeDate">Date</label>
+        <select name="Date" id="changeDate" onchange="changeParam(this.name,value)">
+                <option value="2010">2010</option>
+                <option value="2020, All Time">2020, All Time</option>
+                <option value="2020, Previous Day">2020, Previous Day</option>
+            </select>
+    </div>
+    <div style="width:800px; height:700px;" id='vizContainer'></div>
 </body>
 
 </html>
+
+<style>
+    .filters {
+        display: flex;
+        flex-direction: column;
+        max-width: 50%;
+        margin: 0 auto;
+        padding:20px 0;
+    }
+    
+</style>
 
