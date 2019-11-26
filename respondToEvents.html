@@ -14,15 +14,17 @@
         }
         function initViz() {
             var containerDiv = document.getElementById( 'vizContainer' ),
-                url = "https://public.tableau.com/views/ResponseRatePrototype_15718629692310/ResponseRateDashboard" //"https://public.tableau.com/views/ResponseRatePrototype/ResponseRateDashboard?:display_count=y&:origin=viz_share_link";
+                url = "https://public.tableau.com/views/ResponseRatePrototype5/Federal";
                 options = {
                     onFirstInteractive: function () {
                         workbook = viz.getWorkbook();
                         initEventListeners();
-                    }
+                    },
+                    
                 };
             
-            viz = new tableau.Viz( containerDiv, url, options );
+            viz = new tableau.Viz( containerDiv, url, options );              
+                           
         }
 
         function initEventListeners() {
@@ -87,7 +89,7 @@
             <option value="Hawaii">Hawaii</option>
             <option value="Puerto Rico">Puerto Rico</option>
         </select>
-        <label for="changeGeography">Select a Geography</label>
+        <label for="changeGeography">Select a geography</label>
         <select name="Select a Geography" id="changeGeography" onchange="changeParam(this.name,value)">
             <option value="State">State</option>
             <option value="County">County</option>
@@ -111,7 +113,7 @@
                 <option value="2020, Previous Day">2020, Previous Day</option>
             </select>
     </div>
-    <div id='vizContainer'></div>
+    <div style="width:800px; height:700px;" id='vizContainer'></div>
 </body>
 
 </html>
