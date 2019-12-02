@@ -10,6 +10,7 @@
     <script type='text/javascript'>
         var viz;
         var workbook;
+        var sheet;
         var currParams = {
             state: '',
             geography: ''
@@ -21,6 +22,7 @@
                 options = {
                     onFirstInteractive: function () {
                         workbook = viz.getWorkbook();
+                        sheet = workbook.getActiveSheet().getWorksheets()[0];
                         initEventListeners();
                     },
                     
@@ -84,7 +86,7 @@
                 
             } else {
                 currParams[filterName] = value;
-                workbook.changeParameterValueAsync(filterName, value);
+                viz.getWorkbook().changeParameterValueAsync(filterName, value);
             }
         }
 
@@ -94,7 +96,7 @@
             } else {
                 currParams[filterName] = value;
                 updateUrl(filterName,value);
-                workbook.changeFilterAsync(filterName, value);
+                sheet.applyFilterAsync(filterName, [value], tableau.FilterUpdateType.REPLACE);
             }
         }
         // will need to use a polyfill for ie 11 and lower support. https://github.com/ungap/url-search-params
@@ -109,14 +111,14 @@
 
 <body onload='initViz();''>
     <div class='filters'>
-        <label for='changeState'>State Selection</label>
-        <select name='State Selection' id='changeState' onchange='changeParam(this.name,value)'>
-            <option value="Continguous">Continguous</option>
+        <label for='changeState'>States</label>
+        <select name='States' id='changeState' onchange='changeFilter(this.name,value)'>
+            <option value="Florida">Florida</option>
             <option value="Alaska">Alaska</option>
             <option value="Hawaii">Hawaii</option>
             <option value="Puerto Rico">Puerto Rico</option>
         </select>
-        <label for="changeGeography">Select a geography</label>
+        <label for="changeGeography">Geo Layer</label>
         <select name="Select a Geography" id="changeGeography" onchange="changeParam(this.name,value)">
             <option value="State">State</option>
             <option value="County">County</option>
@@ -128,17 +130,6 @@
                 American Indian/alaska Native Areas/hawaiian Home Lands
             </option>
         </select>
-        <label for="changeGeography">Response Type</label>
-        <select name="Response Type" id="changeResponseType" onchange="changeParam(this.name,value)">
-            <option value="Total">Total</option>
-            <option value="Internet">Internet</option>
-        </select>
-        <label for="changeDate">Date</label>
-        <select name="Date" id="changeDate" onchange="changeParam(this.name,value)">
-                <option value="2010">2010</option>
-                <option value="2020, All Time">2020, All Time</option>
-                <option value="2020, Previous Day">2020, Previous Day</option>
-            </select>
     </div>
     <div style="width:800px; height:700px;" id='vizContainer'></div>
 </body>
