@@ -3,7 +3,9 @@
 <head>
     <title>Respond to Events</title>
     
-    <script type='text/javascript' src='https://public.tableau.com/javascripts/api/tableau-2.min.js'></script>
+
+    <script type="text/javascript" src="https://public.tableau.com/javascripts/api/tableau-2.min.js"></script>
+
     
     <script type='text/javascript'>
         var viz;
@@ -14,6 +16,7 @@
             geography: ''
         }
         function initViz() {
+
             var containerDiv = document.getElementById( 'vizContainer' ),
                 url = "https://public.tableau.com/views/ResponseRatePrototype5/Federal";
                 options = {
@@ -36,12 +39,36 @@
 
         }
 
+
+        function addVizEventListeners() {
+            viz.addEventListener(tableau.TableauEventName.FILTER_CHANGE, onFilterChange);
+            viz.addEventListener(tableau.TableauEventName.PARAMETER_VALUE_CHANGE, onParamChange);
+        }
+
         function onFilterChange(filterChangeEvent) {
             return filterChangeEvent.getFilterAsync().then(reportFilterChange);
         }
 
         function reportFilterChange(updatedFilter) {
             console.log("Filter Changed");
+        }
+
+        function onParamChange(paramChangeEvent) {
+            console.log("Param event triggered...");
+            return paramChangeEvent.getParameterAsync().then(reportParamChange);
+        }
+
+        function reportParamChange(updatedParam) {
+            console.log("Param Changed...");
+        }
+
+        function reportFilterChange(updatedFilter) {
+            console.log("Filter Changed");
+        }
+
+
+        function onMarksSelection(marksEvent) {
+            return marksEvent.getMarksAsync().then(reportSelectedMarks);
         }
 
         function onParameterChange(paramChangeEvent) {
