@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dynamic Filters & Params</title>
+    
+    <script type="text/javascript" src="https://public.tableau.com/javascripts/api/tableau-2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        var viz;
+        var workbook;
+        var sheet;
+        var worksheetArray;
+        var currParams = [];
+        function initViz() {
+            var containerDiv = document.getElementById("vizContainer"),
+                url = "https://public.tableau.com/views/ResponseRatePrototype/ResponseRateDashboard?:display_count=y&:origin=viz_share_link",
+                options = {
+                    onFirstInteractive: function () {
+                        workbook = viz.getWorkbook();
+                        sheet = workbook.getActiveSheet();
+                        worksheetArray = sheet.getWorksheets();
+
+                        addVizEventListeners();
+                        getVizParams();
+                        getVizFilters();
+                        
+                    }
+                };
+            
+            viz = new tableau.Viz(containerDiv, url, options);
+
+        }
+
+        function addVizEventListeners() {
+            viz.addEventListener(tableau.TableauEventName.FILTER_CHANGE, onFilterChange);
+        }
+
+        function onFilterChange(filterChangeEvent) {
+            return filterChangeEvent.getFilterAsync().then(reportFilterChange);
+        }
+
+        function reportFilterChange(updatedFilter) {
+            console.log("Filter Changed");
+        }
+
+        function getVizFilters(){
+
+            sheet.getWorksheets()[0].getFiltersAsync().then(function(filters){
+                
+                filters.forEach(function(filter){
+                    loadFilter(filter)
+                });
+
+                
+            })
+
+        }
+
+        function loadFilter(filter){
+
+            console.log(filter.getAppliedValues());
+
+        }
+
+        function getVizParams(){
+            workbook.getParametersAsync().then(function(res){
+               for(i=0;i<res.length;i++){
+                   loadParam(res[i]);
+               }
+            });
+        }
+
+        function changeParam( filterName,value ){
+            if (value === "") {
+                
+            } else {
+                currParams[filterName] = value;
+                workbook.changeParameterValueAsync(filterName, value);
+            }
+        }
+
+        function loadParam(param){
+            var html = "";
+            var paramsDiv = document.getElementById('params');
+            var label =  "<label for="+param.getName()+">"+param.getName()+"</label>";
+            var select = document.createElement('select');
+            select.setAttribute('name',param.getName());
+            select.id = param.getName();
+            paramsDiv.innerHTML += label;
+            paramsDiv.appendChild(select);
+            $(select).addClass(param.getName());
+
+            $(document).on('change','select',function(event){
+                event.preventDefault();
+                var target = $(event.target);
+                if(target.hasClass(param.getName())){
+                    changeParam(param.getName(),$(this).val());
+                }
+
+            })
+            var vals = param.getAllowableValues();
+            vals.forEach(function(val){
+                var option  = document.createElement('option');
+                option.innerHTML = val.formattedValue;
+                option.value = val.value;
+                select.appendChild(option);
+
+            })
+
+        }
+    </script>
+</head>
+
+<body onload="initViz();">
+    <div class='params' id="params">
+    </div>
+    <div id="vizContainer"></div>
+    
+</body>
+
+</html>
+
+<style>
+    .params {
+        display: flex;
+        flex-direction: column;
+        max-width: 50%;
+        margin: 0 auto;
+        padding:20px 0;
+    }
+    
+</style>
